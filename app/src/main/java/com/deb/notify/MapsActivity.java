@@ -334,7 +334,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mPolygon != null) {
             mPolygon.setStrokeColor(Color.rgb(red, green, blue));
             if (mCheckBox.isChecked()) {
-                mPolygon.setFillColor(Color.rgb(red, green, blue));
+                mPolygon.setFillColor(Color.BLACK);
             }
         }
     }
