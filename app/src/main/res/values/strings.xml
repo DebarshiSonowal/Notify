@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Notify</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="click_me_to_show_ur_location">click me to show ur location</string>
+</resources>

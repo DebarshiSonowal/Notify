@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "600118270526",
+    "firebase_url": "https://notify-c3141.firebaseio.com",
+    "project_id": "notify-c3141",
+    "storage_bucket": "notify-c3141.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600118270526:android:ebfd2e8d76d6e4041e8f6f",
+        "android_client_info": {
+          "package_name": "com.deb.notify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600118270526-jeaf7i5qn7cvnpl1p1q9crf2ki2484uh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.deb.notify",
+            "certificate_hash": "a811250c388194aec02d0be825f7c80a025040e0"
+          }
+        },
+        {
+          "client_id": "600118270526-10g8ep292v0uqf8ba813j66krsu2af58.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAc3-VOlwk2M9wYJkUtBtiENJP4v6ZKYNU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600118270526-10g8ep292v0uqf8ba813j66krsu2af58.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
