@@ -14,7 +14,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,17 +39,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,SeekBar.OnSeekBarChangeListener{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback{
 
-    //intialize variable
+    //initialize variable
     private GoogleMap mMap;
     LocationManager locationManager;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     Marker marker;
     LocationListener locationListener;
     CheckBox mCheckBox;
-    SeekBar seekred,seekblue,seekgreen;
-    Button btDraw,btClear;
+    Button btDraw,btClear,btLoc;
     Polygon mPolygon = null;
     List<LatLng> mLatLngs = new ArrayList<>();
     List<Marker> markerList = new ArrayList<>();
@@ -82,11 +80,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 PolygonOptions polygonOptions = new PolygonOptions().addAll(mLatLngs).clickable(true);
 
                 mPolygon = mMap.addPolygon(polygonOptions);
-
+                mPolygon.setTag("First Location");
                 mPolygon.setStrokeColor(Color.rgb(red,green,blue));
                 if(mCheckBox.isChecked())
                 {
-                    mPolygon.setFillColor(Color.rgb(red,green,blue));
+                    mPolygon.setFillColor(Color.BLACK);
                 }
             }
         });
@@ -98,15 +96,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mLatLngs.clear();
                 markerList.clear();
                 mCheckBox.setChecked(false);
-                seekred.setProgress(0);
-                seekgreen.setProgress(0);
-                seekblue.setProgress(0);
             }
         });
 
-        seekred.setOnSeekBarChangeListener(this);
-        seekgreen.setOnSeekBarChangeListener(this);
-        seekblue.setOnSeekBarChangeListener(this);
     }
 
 
@@ -117,15 +109,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //Assign Variable
         mCheckBox = findViewById(R.id.check_box);
-        seekred = findViewById(R.id.seek_red);
-        seekblue = findViewById(R.id.seek_blue);
-        seekgreen = findViewById(R.id.seek_green);
         btDraw = findViewById(R.id.bt_draw);
         btClear = findViewById(R.id.bt_clear);
+        btLoc = findViewById(R.id.bt_loc);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this,
@@ -140,7 +131,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationListener = new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-
                     LocationHelper helper = new LocationHelper(location.getLongitude(),location.getLatitude());
 
                     FirebaseDatabase.getInstance().getReference("CurrentLocation").setValue(helper).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -159,7 +149,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     double longitude = location.getLongitude();
                     //get the location name from latitude and longitude
                     Geocoder geocoder = new Geocoder(getApplicationContext());
-
                     try {
                         List<Address> addresses =
                                 geocoder.getFromLocation(latitude, longitude, 1);
@@ -246,15 +235,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (marker != null){
                             marker.remove();
                             marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
-
-                            //new MarkerOptions()
-                            //    .position(SYDNEY)
-                            //    .title("Sydney")
-                            //    .snippet("Population: 4,627,300")
-                            //    .icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow)))
-
-
-
                             CameraPosition cameraPosition = new CameraPosition.Builder().target(latLng).zoom(20).build();
                             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                         }
@@ -296,16 +276,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMinZoomPreference(6.0f);
+        mMap.setMaxZoomPreference(14.0f);
+        CameraUpdateFactory.scrollBy(6, 6);
         mMap .setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-
+                int i=1;
                 MarkerOptions markerOptions = new MarkerOptions().position(latLng).draggable(true);
                 Marker marker = mMap.addMarker(markerOptions);
                 Log.d("Marker","" + latLng.longitude + " " + latLng.latitude);
                 mLatLngs.add(latLng);
-                markerList.add(marker);
+               markerList.add(marker);
+                for(int j=0;j<mLatLngs.size();j++)
+                {
+                    LatLng latLng1 = new LatLng( mLatLngs.get(j).longitude,  mLatLngs.get(j).latitude);
+                    polylocation loc = new polylocation(j + "st point",latLng1.longitude,latLng1.latitude);
+                    FirebaseDatabase.getInstance().getReference("Marked Location").child(i+"st polygon").child(j+"points").setValue(loc);
 
+                }
 
             }
         });
@@ -317,35 +306,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationManager.removeUpdates(locationListener);
     }
 
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        switch (seekBar.getId()) {
-            case R.id.seek_red:
-                red =i ;
-                break;
-            case R.id.seek_green:
-                green = i;
-                break;
-
-            case R.id.seek_blue:
-                blue = i;
-                break;
-        }
-        if (mPolygon != null) {
-            mPolygon.setStrokeColor(Color.rgb(red, green, blue));
-            if (mCheckBox.isChecked()) {
-                mPolygon.setFillColor(Color.BLACK);
-            }
-        }
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-
-    }
 }
