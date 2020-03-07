@@ -50,11 +50,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     List<LatLng> mLatLngs = new ArrayList<>();
     List<Marker> markerList = new ArrayList<>();
     List<LatLng> mLatLangs = new ArrayList<>();
+    LatLng mLng;
     List<Marker> mMarkerList = new ArrayList<>();
     private  static  final int Request_Code=101;
     Boolean flag = false,incr = false;
+    final static int polypoint = 5;
+    int k = 1;
+    int red =0, blue = 0, green = 0;
 
-    int red = 0,green =0,blue =0;
 
 
     @Override
@@ -75,14 +78,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mPolygon.setTag("First Location");
                 mPolygon.setStrokeColor(Color.rgb(red,green,blue));
                 mPolygon.setFillColor(Color.BLACK);
-                mLatLngs.addAll(mLatLangs);
-                mMarkerList.addAll(markerList);
                 mLatLngs.clear();
-                markerList.clear();
+                for(Marker marker:markerList) marker.remove();
                 flag = true;
                 incr = true;
 
             }
+
         });
         btClear.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -274,30 +276,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMinZoomPreference(5.0f);
         mMap.setMaxZoomPreference(25.0f);
         CameraUpdateFactory.scrollBy(6, 6);
+
         mMap .setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                int i=1;
-                if(flag)
-                {
-                    for(Marker marker:markerList) marker.remove();
+                if (flag) {
+                    for (Marker marker : markerList) marker.remove();
                 }
                 MarkerOptions markerOptions = new MarkerOptions().position(latLng).draggable(true);
                 Marker marker = mMap.addMarker(markerOptions);
-                Log.d("Marker","" + latLng.longitude + " " + latLng.latitude);
                 mLatLngs.add(latLng);
-               markerList.add(marker);
-                for(int j=0;j<mLatLngs.size();j++)
-                {
-                    LatLng latLng1 = new LatLng( mLatLngs.get(j).longitude,  mLatLngs.get(j).latitude);
-                    polylocation loc = new polylocation(latLng1.longitude,latLng1.latitude);
-                    FirebaseDatabase.getInstance().getReference("Marked Location").child(i+"st polygon").child(j+"points").setValue(loc);
-                    if(incr)
-                    {
-                        i++;
-                        incr = false;
-                    }
+                markerList.add(marker);
+                int pol = mLatLngs.size()/polypoint;
+                for (int i = 1; i <= pol; i++) {
+                    for (int j = 0; j < polypoint; j++) {
+                        mLng = mLatLngs.get(j);
+                        polylocation loc = new polylocation(mLng.longitude,mLng.latitude);
+                        FirebaseDatabase.getInstance().getReference("Marked Location").child(k + "st polygon").child(j + "points").setValue(loc);
 
+                    }
+                    k++;
                 }
 
             }
