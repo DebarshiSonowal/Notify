@@ -13,24 +13,19 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.example.bright.trackmenew.MapsActivity" />
+        tools:context="com.deb.notify.MapsActivity" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="-3dp"
         android:background="@android:color/white"
         android:orientation="vertical"
         android:padding="10dp">
 
-        <CheckBox
-            android:id="@+id/check_box"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Fill polygon" />
-
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="400dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:orientation="horizontal"
@@ -38,24 +33,24 @@
 
             <Button
                 android:id="@+id/bt_draw"
-                android:layout_width="30dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.5"
-                android:text="draw polygon" />
+                android:layout_weight="1"
+                android:text="@string/draw_polygon" />
 
             <Button
                 android:id="@+id/bt_clear"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:text="clear" />
+                android:text="@string/clear" />
 
             <Button
-                android:id="@+id/bt_loc"
-                android:layout_width="wrap_content"
+                android:id="@+id/bt_save"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1.5"
-                android:text="@string/location" />
+                android:layout_weight=".5"
+                android:text="@string/save" />
 
         </LinearLayout>
 

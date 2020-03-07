@@ -1,22 +1,12 @@
 package com.deb.notify;
 
 public class polylocation {
-    private String name;
     private  double Latitude;
     private  double Longitude;
 
-    public polylocation(String name, double latitude, double longitude) {
-        this.name = name;
+    polylocation(double latitude, double longitude) {
         Latitude = latitude;
         Longitude = longitude;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public double getLatitude() {

@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,13 +45,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     Marker marker;
     LocationListener locationListener;
-    CheckBox mCheckBox;
-    Button btDraw,btClear,btLoc;
+    Button btDraw,btClear,btSave;
     Polygon mPolygon = null;
     List<LatLng> mLatLngs = new ArrayList<>();
     List<Marker> markerList = new ArrayList<>();
+    List<LatLng> mLatLangs = new ArrayList<>();
+    List<Marker> mMarkerList = new ArrayList<>();
     private  static  final int Request_Code=101;
-
+    Boolean flag = false,incr = false;
 
     int red = 0,green =0,blue =0;
 
@@ -61,31 +60,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onStart() {
         super.onStart();
-        mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        btSave.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
-                    if (mPolygon == null) return;;
-
-                    mPolygon.setFillColor(Color.rgb(red,green,blue));
-                }else {
-                    mPolygon.setFillColor(Color.TRANSPARENT);
-                }
+            public void onClick(View v) {
+                flag = true;
             }
         });
         btDraw.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mPolygon != null) mPolygon.remove();
                 PolygonOptions polygonOptions = new PolygonOptions().addAll(mLatLngs).clickable(true);
 
                 mPolygon = mMap.addPolygon(polygonOptions);
                 mPolygon.setTag("First Location");
                 mPolygon.setStrokeColor(Color.rgb(red,green,blue));
-                if(mCheckBox.isChecked())
-                {
-                    mPolygon.setFillColor(Color.BLACK);
-                }
+                mPolygon.setFillColor(Color.BLACK);
+                mLatLngs.addAll(mLatLangs);
+                mMarkerList.addAll(markerList);
+                mLatLngs.clear();
+                markerList.clear();
+                flag = true;
+                incr = true;
+
             }
         });
         btClear.setOnClickListener(new View.OnClickListener() {
@@ -94,8 +90,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if(mPolygon != null) mPolygon.remove();
                 for(Marker marker:markerList) marker.remove();
                 mLatLngs.clear();
-                markerList.clear();
-                mCheckBox.setChecked(false);
+
             }
         });
 
@@ -108,10 +103,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         //Assign Variable
-        mCheckBox = findViewById(R.id.check_box);
         btDraw = findViewById(R.id.bt_draw);
         btClear = findViewById(R.id.bt_clear);
-        btLoc = findViewById(R.id.bt_loc);
+        btSave = findViewById(R.id.bt_save);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -119,6 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -276,13 +271,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMinZoomPreference(6.0f);
-        mMap.setMaxZoomPreference(14.0f);
+        mMap.setMinZoomPreference(5.0f);
+        mMap.setMaxZoomPreference(25.0f);
         CameraUpdateFactory.scrollBy(6, 6);
         mMap .setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
                 int i=1;
+                if(flag)
+                {
+                    for(Marker marker:markerList) marker.remove();
+                }
                 MarkerOptions markerOptions = new MarkerOptions().position(latLng).draggable(true);
                 Marker marker = mMap.addMarker(markerOptions);
                 Log.d("Marker","" + latLng.longitude + " " + latLng.latitude);
@@ -291,8 +290,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for(int j=0;j<mLatLngs.size();j++)
                 {
                     LatLng latLng1 = new LatLng( mLatLngs.get(j).longitude,  mLatLngs.get(j).latitude);
-                    polylocation loc = new polylocation(j + "st point",latLng1.longitude,latLng1.latitude);
+                    polylocation loc = new polylocation(latLng1.longitude,latLng1.latitude);
                     FirebaseDatabase.getInstance().getReference("Marked Location").child(i+"st polygon").child(j+"points").setValue(loc);
+                    if(incr)
+                    {
+                        i++;
+                        incr = false;
+                    }
 
                 }
 
