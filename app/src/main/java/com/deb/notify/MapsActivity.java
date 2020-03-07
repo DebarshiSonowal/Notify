@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -210,10 +209,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if(task.isSuccessful()){
-                                Toast.makeText(MapsActivity.this,"Location Saved",Toast.LENGTH_SHORT);
+                                
                                 Log.d("Saved","Location saved");
                             }else {
-                                Toast.makeText(MapsActivity.this,"Location not saved",Toast.LENGTH_SHORT);
+
                                 Log.d("Saved","Location not saved");
                             }
 
