@@ -6,7 +6,6 @@
     <string name="draw_polygon">draw polygon</string>
     <string name="clear">clear</string>
     <string name="save">Save</string>
-
     <string name="fill_polygon">Fill polygon</string>
 
 </resources>

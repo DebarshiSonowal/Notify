@@ -44,11 +44,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     Marker marker;
     LocationListener locationListener;
-    Button btDraw,btClear,btSave;
+    Button btDraw,btClear,btLoc;
     Polygon mPolygon = null;
     List<LatLng> mLatLngs = new ArrayList<>();
     List<Marker> markerList = new ArrayList<>();
-    List<LatLng> mLatLangs = new ArrayList<>();
     LatLng mLng;
     List<Marker> mMarkerList = new ArrayList<>();
     private  static  final int Request_Code=101;
@@ -62,10 +61,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onStart() {
         super.onStart();
-        btSave.setOnClickListener(new View.OnClickListener() {
+        btLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 flag = true;
+            }
+        });
+
+        btClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mPolygon != null) mPolygon.remove();
+                for(Marker marker:markerList) marker.remove();
+                mLatLngs.clear();
+
             }
         });
         btDraw.setOnClickListener(new View.OnClickListener() {
@@ -79,20 +88,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mPolygon.setFillColor(Color.BLACK);
                 mLatLngs.clear();
                 for(Marker marker:markerList) marker.remove();
-                flag = true;
                 incr = true;
 
             }
 
-        });
-        btClear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mPolygon != null) mPolygon.remove();
-                for(Marker marker:markerList) marker.remove();
-                mLatLngs.clear();
-
-            }
         });
 
     }
@@ -103,10 +102,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+
+
         //Assign Variable
         btDraw = findViewById(R.id.bt_draw);
         btClear = findViewById(R.id.bt_clear);
-        btSave = findViewById(R.id.bt_save);
+        btLoc = findViewById(R.id.bt_loc);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -152,12 +153,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         result += addresses.get(0).getCountryName();
                         LatLng latLng = new LatLng(latitude, longitude);
                         if (marker != null){
-                            marker.remove();
-                            marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
+                            if(flag) {
+                                marker.remove();
+                                marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
 
-
-                            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLng).zoom(20).build();
-                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                                CameraPosition cameraPosition = new CameraPosition.Builder().target(latLng).zoom(20).build();
+                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                                flag = false;
+                            }
                         }
                         else{
                             marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
@@ -203,49 +206,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationListener = new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    LocationHelper helper = new LocationHelper(location.getLongitude(),location.getLatitude());
+                    if (flag) {
+                        LocationHelper helper = new LocationHelper(location.getLongitude(), location.getLatitude());
 
-                    FirebaseDatabase.getInstance().getReference("CurrentLocation").setValue(helper).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                
-                                Log.d("Saved","Location saved");
-                            }else {
+                        FirebaseDatabase.getInstance().getReference("CurrentLocation").setValue(helper).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
 
-                                Log.d("Saved","Location not saved");
+                                    Log.d("Saved", "Location saved");
+                                } else {
+
+                                    Log.d("Saved", "Location not saved");
+                                }
+
+                            }
+                        });
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        //get the location name from latitude and longitude
+                        Geocoder geocoder = new Geocoder(getApplicationContext());
+                        try {
+                            List<Address> addresses =
+                                    geocoder.getFromLocation(latitude, longitude, 1);
+                            String result = addresses.get(0).getLocality() + ":";
+                            result += addresses.get(0).getCountryName();
+                            LatLng latLng = new LatLng(latitude, longitude);
+                            if (marker != null) {
+                                marker.remove();
+                                marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
+                                CameraPosition cameraPosition = new CameraPosition.Builder().target(latLng).zoom(20).build();
+                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                            } else {
+                                marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
+
+
+                                CameraPosition cameraPosition = new CameraPosition.Builder().target(latLng).zoom(20).build();
+                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                             }
 
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    });
-                    double latitude = location.getLatitude();
-                    double longitude = location.getLongitude();
-                    //get the location name from latitude and longitude
-                    Geocoder geocoder = new Geocoder(getApplicationContext());
-                    try {
-                        List<Address> addresses =
-                                geocoder.getFromLocation(latitude, longitude, 1);
-                        String result = addresses.get(0).getLocality()+":";
-                        result += addresses.get(0).getCountryName();
-                        LatLng latLng = new LatLng(latitude, longitude);
-                        if (marker != null){
-                            marker.remove();
-                            marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
-                            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLng).zoom(20).build();
-                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                        }
-                        else{
-                            marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result).icon(BitmapDescriptorFactory.fromResource(R.drawable.purple)));
-
-
-                            CameraPosition cameraPosition = new CameraPosition.Builder().target(latLng).zoom(20).build();
-                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                        }
-
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+                    flag = false;
                 }
 
                 @Override
@@ -272,10 +277,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMinZoomPreference(5.0f);
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        mMap.setBuildingsEnabled(true);
+        mMap.setIndoorEnabled(true);
+        mMap.setMinZoomPreference(1.0f);
         mMap.setMaxZoomPreference(25.0f);
         CameraUpdateFactory.scrollBy(6, 6);
-
         mMap .setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -291,7 +298,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     for (int j = 0; j < polypoint; j++) {
                         mLng = mLatLngs.get(j);
                         polylocation loc = new polylocation(mLng.longitude,mLng.latitude);
-                        FirebaseDatabase.getInstance().getReference("Marked Location").child(k + "st polygon").child(j + "points").setValue(loc);
+                       FirebaseDatabase.getInstance().getReference("Marked Location").child(k + "st polygon").child(j + "no corners").setValue(loc);
 
                     }
                     k++;
@@ -299,6 +306,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(locationListener);
     }
 
     @Override
