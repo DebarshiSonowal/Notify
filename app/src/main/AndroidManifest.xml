@@ -28,6 +28,9 @@
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-4889618202360309~3326007238"/>
+        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCX3yvznczm9Fd7KHhP_qHSpvKAKlcS8_0"/>
 

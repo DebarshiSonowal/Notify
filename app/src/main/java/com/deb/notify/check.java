@@ -7,7 +7,6 @@ import java.util.List;
 
 public class check {
     private List<LatLng> mLatLangs = new ArrayList<>();
-
     public void setLatLangs(List<LatLng> latLangs) {
         mLatLangs = latLangs;
     }

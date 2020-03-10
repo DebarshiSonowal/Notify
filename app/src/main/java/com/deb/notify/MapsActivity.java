@@ -1,6 +1,7 @@
 package com.deb.notify;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
@@ -58,6 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -89,10 +91,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mLatLngs.clear();
                 for(Marker marker:markerList) marker.remove();
                 incr = true;
+                openDialog();
 
             }
 
         });
+
+    }
+
+    private void openDialog() {
+        Context context;
+        Dialogbox dialog = new Dialogbox();
+        dialog.show(getSupportFragmentManager(),"Example dialog");
 
     }
 
@@ -208,7 +218,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 public void onLocationChanged(Location location) {
                     if (flag) {
                         LocationHelper helper = new LocationHelper(location.getLongitude(), location.getLatitude());
-
                         FirebaseDatabase.getInstance().getReference("CurrentLocation").setValue(helper).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -276,6 +285,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         mMap.setBuildingsEnabled(true);
@@ -314,7 +324,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationManager.removeUpdates(locationListener);
     }
 
-    @Override
     protected void onStop() {
         super.onStop();
         locationManager.removeUpdates(locationListener);

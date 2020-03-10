@@ -7,5 +7,6 @@
     <string name="clear">clear</string>
     <string name="save">Save</string>
     <string name="fill_polygon">Fill polygon</string>
+    <string name="mark_location">Mark Location</string>
 
 </resources>
